@@ -2,24 +2,32 @@ module BootstrapForms
   module Helpers
     module Wrappers
       private
+      def inline?
+        @options and @options[:inline]
+      end
+      
       def control_group_div(&block)
-        field_errors = error_string
-        if @field_options[:error]
-          (@field_options[:error] << ", " << field_errors) if field_errors
+        if inline?
+          block.call
         else
-          @field_options[:error] = field_errors
+          field_errors = error_string
+          if @field_options[:error]
+            (@field_options[:error] << ", " << field_errors) if field_errors
+          else
+            @field_options[:error] = field_errors
+          end
+
+          klasses = []
+          klasses << 'control-group' unless @field_options[:control_group] == false
+          klasses << 'error' if @field_options[:error]
+          klasses << 'success' if @field_options[:success]
+          klasses << 'warning' if @field_options[:warning]
+
+          control_group_options = {}
+          control_group_options[:class] = klasses if !klasses.empty?
+
+          content_tag(:div, control_group_options, &block)
         end
-
-        klasses = []
-        klasses << 'control-group' unless @field_options[:control_group] == false
-        klasses << 'error' if @field_options[:error]
-        klasses << 'success' if @field_options[:success]
-        klasses << 'warning' if @field_options[:warning]
-
-        control_group_options = {}
-        control_group_options[:class] = klasses if !klasses.empty?
-
-        content_tag(:div, control_group_options, &block)
       end
 
       def error_string
@@ -38,14 +46,18 @@ module BootstrapForms
       end
 
       def input_div(&block)
-        content_options = {}
-        content_options[:class] = 'controls'
-        if @field_options[:control_group] == false
-          @field_options.delete :control_group
-          write_input_div(&block)
+        if inline?
+          block.call
         else
-          content_tag(:div, :class => 'controls') do
+          content_options = {}
+          content_options[:class] = 'controls'
+          if @field_options[:control_group] == false
+            @field_options.delete :control_group
             write_input_div(&block)
+          else
+            content_tag(:div, :class => 'controls') do
+              write_input_div(&block)
+            end
           end
         end
       end
@@ -62,7 +74,7 @@ module BootstrapForms
       end
 
       def label_field(&block)
-        if @field_options[:label] == '' || @field_options[:label] == false
+        if inline? || @field_options[:label] == '' || @field_options[:label] == false
           return ''.html_safe
         else
           label_options = {}

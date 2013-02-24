@@ -4,6 +4,16 @@ module BootstrapForms
 
     delegate :content_tag, :hidden_field_tag, :check_box_tag, :radio_button_tag, :button_tag, :link_to, :to => :@template
 
+    def initialize(*args)
+      super
+      if inline?
+        @options[:html] ||= {}
+        classes = (@options[:html][:class] || "").split
+        classes << "form-inline"
+        @options[:html][:class] = classes.uniq.join(" ")
+      end
+    end
+    
     def error_messages
       if object.try(:errors) and object.errors.full_messages.any?
         content_tag(:div, :class => 'alert alert-block alert-error validation-errors') do
@@ -74,18 +84,22 @@ module BootstrapForms
       @field_options = field_options(args)
       @args = args
 
-      control_group_div do
-        label_field + extras do
-          content_tag(:div, :class => 'controls') do
-            options = @field_options.merge(required_attribute)
-            records.collect do |record|
-              options[:id] = "#{object_name}_#{attribute}_#{record.send(record_id)}"
-              checkbox = check_box_tag("#{object_name}[#{attribute}][]", record.send(record_id), [object.send(attribute)].flatten.include?(record.send(record_id)), options)
+      options = @field_options.merge(required_attribute)
+      checkboxes = records.collect do |record|
+        options[:id] = "#{object_name}_#{attribute}_#{record.send(record_id)}"
+        checkbox = check_box_tag("#{object_name}[#{attribute}][]", record.send(record_id), [object.send(attribute)].flatten.include?(record.send(record_id)), options)
 
-              content_tag(:label, :class => ['checkbox', ('inline' if @field_options[:inline])].compact) do
-                checkbox + content_tag(:span, record.send(record_name))
-              end
-            end.join('').html_safe
+        content_tag(:label, :class => ['checkbox', ('inline' if @field_options[:inline])].compact) do
+          checkbox + content_tag(:span, record.send(record_name))
+        end
+      end.join('').html_safe
+
+      if inline?
+        checkboxes
+      else
+        control_group_div do
+          label_field + extras do
+            content_tag(:div, checkboxes, :class => 'controls')
           end
         end
       end

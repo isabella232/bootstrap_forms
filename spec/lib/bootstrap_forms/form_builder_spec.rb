@@ -2,11 +2,12 @@ require 'spec_helper'
 
 describe 'BootstrapForms::FormBuilder' do
   context 'given a setup builder' do
+    let(:builder_options) { {} }
     before(:each) do
       @project = Project.new
       @template = ActionView::Base.new
       @template.output_buffer =''
-      @builder = BootstrapForms::FormBuilder.new(:item, @project, @template, {}, proc {})
+      @builder = BootstrapForms::FormBuilder.new(:item, @project, @template, builder_options, proc {})
     end
 
     context 'with no options' do
@@ -130,6 +131,30 @@ describe 'BootstrapForms::FormBuilder' do
     context 'button' do
       it 'checks persistence of object' do
         @builder.button.should match('Create Project')
+      end
+    end
+
+    context 'inline' do
+      let(:builder_options) { {:inline => true} }
+      
+      it 'adds html class' do
+        @builder.options[:html][:class].should eq("form-inline")
+      end
+      
+      it 'should not add control group' do
+        @builder.text_field('name').should_not match /control-group/
+      end
+      
+      it 'should not add controls' do
+        @builder.text_field('name').should_not match /controls/
+      end
+      
+      it 'should not add label' do
+        @builder.text_field('name').should_not match /<label/
+      end
+
+      it 'should work on checkbox' do
+        @builder.check_box(:boolean).should eq('<label class="checkbox" for="item_boolean"><input name="item[boolean]" type="hidden" value="0" /><input id="item_boolean" name="item[boolean]" type="checkbox" value="1" />Boolean</label>')
       end
     end
   end

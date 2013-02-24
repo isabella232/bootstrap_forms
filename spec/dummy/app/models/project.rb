@@ -6,6 +6,6 @@ class Project < ActiveRecord::Base
   validates :unless_presence, :presence => true, :unless => lambda { true}
   validates :create_presence, :presence => true, :on => :create
   validates :update_presence, :presence => true, :on => :update
-  attr_accessor :if_presence, :unless_presence, :create_presence, :update_presence
+  attr_accessor :if_presence, :unless_presence, :create_presence, :update_presence, :boolean
   
 end
