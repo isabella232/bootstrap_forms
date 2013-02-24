@@ -94,11 +94,11 @@ module BootstrapForms
         end
       end.join('').html_safe
 
-      if inline?
-        checkboxes
-      else
-        control_group_div do
-          label_field + extras do
+      control_group_div do
+        label_field + extras do
+          if inline?
+            checkboxes
+          else
             content_tag(:div, checkboxes, :class => 'controls')
           end
         end

@@ -156,6 +156,20 @@ describe 'BootstrapForms::FormBuilder' do
       it 'should work on checkbox' do
         @builder.check_box(:boolean).should eq('<label class="checkbox" for="item_boolean"><input name="item[boolean]" type="hidden" value="0" /><input id="item_boolean" name="item[boolean]" type="checkbox" value="1" />Boolean</label>')
       end
+
+      context "on checkbox collection" do
+        let(:options) { {} }
+        subject { @builder.collection_check_boxes(:name, [["foo", "Foo"], ["bar", "Bar"]], :first, :last, options) }
+        it { should_not match /control-group/ }
+        it { should_not match /controls/ }
+        it { should match /<label class=".*checkbox/ }
+        it { should_not match /<label class=".*inline/ }
+        
+        context "inline" do
+          let(:options) { {:inline => true} }
+          it { should match /<label class=".*inline/ }
+        end
+      end
     end
   end
 
