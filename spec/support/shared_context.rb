@@ -136,6 +136,17 @@ shared_examples 'a bootstrap form' do
       end
     end
     
+    describe 'select with custom label' do
+      it 'uses the custom label' do
+        @builder.select(:name, [["foo", "Foo"]], { :label => 'Custom label' }).should match /<label class="control-label" for="item_name">Custom label<\/label>/
+      end
+    end
+
+    describe 'select with html options' do
+      it 'uses html options' do
+        @builder.select(:name, [["foo", "Foo"]], {}, { :class => 'foo' }).should match /<select [^>]*class="foo"/
+      end
+    end
   end # no options
 
   describe 'extras' do
